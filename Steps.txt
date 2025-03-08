@@ -1,0 +1,46 @@
+kubectl version --client
+kubectl get nodes
+
+mkdir my-k8s-app && cd my-k8s-app
+
+docker build -t my-k8s-app .
+docker run -p 5000:5000 my-k8s-app
+
+docker login
+docker tag my-k8s-app your-dockerhub-username/my-k8s-app:v1
+docker push your-dockerhub-username/my-k8s-app:v1
+
+kubectl apply -f deployment.yaml
+kubectl get pods
+
+kubectl apply -f service.yaml
+kubectl get services
+
+kubectl scale deployment my-k8s-app --replicas=4
+kubectl get pods
+
+================================================
+kubectl delete deployment my-k8s-app
+kubectl delete service my-k8s-app-service
+docker rmi your-dockerhub-username/my-k8s-app:v1
+
+
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+helm install jenkins jenkins/jenkins --set controller.serviceType=NodePort
+
+docker pull jenkins/jenkins:lts
+docker run -d --name jenkins -p 8080:8080 -p 50000:50000 `
+  -v jenkins_home:/var/jenkins_home `
+  -v //var/run/docker.sock:/var/run/docker.sock `
+  jenkins/jenkins:lts
+docker logs jenkins
+
+docker exec -it jenkins bash
+apt-get update
+apt-get install -y docker.io
+exit
+
+docker exec -it jenkins usermod -aG docker jenkins
+docker restart jenkins
+
